@@ -21,7 +21,7 @@ class JSONPatchMongoose {
     this.options = Object.assign({
       autosave: false,
       autopopulate: true,
-    },options);
+    }, options);
     if (options.rules)
       this.patch_rules = new JSONPatchRules(options.rules, {mode: options.rules_mode});
     this.save_queue = [];
