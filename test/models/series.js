@@ -14,7 +14,6 @@ const Series = new Schema({
 });
 
 Series.plugin(json_patch_plugin, {
-  autosave: true,
   //blacklist rules, allow anything to be modified on the series
   rules: [],
   rules_mode: 'blacklist',

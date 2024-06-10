@@ -28,8 +28,8 @@ module.exports = [
         exports: "always-multiline",
         functions: "ignore",
       }],
-      "prefer-const": ["error", {destructuring: "any", ignoreReadBeforeAssign: false}],
-      "no-constant-condition": ["error", {checkLoops: false}],
+      "prefer-const": ["error", { destructuring: "any", ignoreReadBeforeAssign: false }],
+      "no-constant-condition": ["error", { checkLoops: false }],
       "consistent-return": 0,
       "mocha/consistent-spacing-between-blocks": 0,
       "indent": ["error", 2],
@@ -44,6 +44,7 @@ module.exports = [
       "keyword-spacing": ['warn', {}],
       '@stylistic/js/no-trailing-spaces': ['error', {}],
       '@stylistic/js/space-infix-ops': ['warn', {}],
+      'object-curly-spacing': ['warn', 'always'],
     },
   },
 ];

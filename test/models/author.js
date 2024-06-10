@@ -24,12 +24,12 @@ const Author = new Schema({
     address_2: String,
   },
   phone_numbers: [String],
-}, {
-
+  aliases: {
+    names: [String],
+  },
 });
 
 Author.plugin(json_patch_plugin, {
-  autosave: true,
   //blacklist rules, don't allow publisher to be modified
   rules: [
     { path: "/publisher", op: ['add','replace','copy','move','remove','test'] },

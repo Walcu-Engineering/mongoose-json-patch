@@ -31,7 +31,6 @@ const Book = new Schema({
 });
 
 Book.plugin(json_patch_plugin, {
-  autosave: true,
   //blacklist rules, don't allow publisher to be modified
   rules: [
     { path: "/publisher", op: ['add','replace','copy','move','remove','test'] },

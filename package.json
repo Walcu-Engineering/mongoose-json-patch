@@ -4,7 +4,8 @@
   "description": "A utility for applying RFC6902 JSONPatch operations to mongoose models",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "debug_test": "mocha --inspect-brk"
   },
   "repository": {
     "type": "git",
@@ -15,8 +16,6 @@
     "jsonpatch",
     "json",
     "patch",
-    "autopopulate",
-    "populate",
     "mongodb",
     "rfc6902",
     "model"

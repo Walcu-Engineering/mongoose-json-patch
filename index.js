@@ -6,10 +6,10 @@ const JSONPatchMongoose = require('./json_patch_mongoose');
  * @param {*} options
  */
 async function plugin(schema, schema_level_options) {
-  schema.methods.jsonPatch = async function(patch, options) {
+  schema.methods.jsonPatch = function(patch, options) {
     const document = this;
     const patcher = new JSONPatchMongoose(schema, options || schema_level_options);
-    await patcher.apply(patch, document);
+    patcher.apply(patch, document);
   }
 }
 
