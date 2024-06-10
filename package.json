@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/claytongulick/mongoose-json-patch#readme",
   "dependencies": {
-    "ajv": "^6.10.0",
+    "ajv": "8.16.0",
     "json-patch-rules": "^0.1.0",
     "mongoose": "8.4.0"
   },
