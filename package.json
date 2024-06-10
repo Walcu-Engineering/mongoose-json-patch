@@ -28,17 +28,16 @@
   },
   "homepage": "https://github.com/claytongulick/mongoose-json-patch#readme",
   "dependencies": {
-    "@babel/eslint-parser": "^7.24.7",
-    "@stylistic/eslint-plugin-js": "^2.1.0",
     "ajv": "^6.10.0",
-    "eslint-plugin-mocha": "^10.4.3",
-    "eslint-plugin-node": "^11.1.0",
     "json-patch-rules": "^0.1.0",
     "mongoose": "8.4.0"
   },
   "devDependencies": {
     "chai": "^5.1.1",
     "mocha": "^10.4.0",
-    "mongodb-memory-server": "^9.3.0"
+    "mongodb-memory-server": "^9.3.0",
+    "@stylistic/eslint-plugin-js": "^2.1.0",
+    "eslint-plugin-mocha": "^10.4.3",
+    "eslint-plugin-node": "^11.1.0"
   }
 }

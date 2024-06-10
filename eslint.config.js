@@ -43,6 +43,7 @@ module.exports = [
       "no-use-before-define": [2, "nofunc"],
       "keyword-spacing": ['warn', {}],
       '@stylistic/js/no-trailing-spaces': ['error', {}],
+      '@stylistic/js/space-infix-ops': ['warn', {}],
     },
   },
 ];

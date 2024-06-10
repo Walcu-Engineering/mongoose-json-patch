@@ -117,7 +117,7 @@ class JSONPatchMongoose {
     let {path, value} = item;
     path = this.jsonPointerToMongoosePath(path);
     const parts = path.split('.');
-    let part = parts[parts.length -1];
+    let part = parts[parts.length - 1];
     const parent = this.walkPath(path, -1);
     if (Array.isArray(parent)) {
       //this should always be true
@@ -227,7 +227,7 @@ class JSONPatchMongoose {
 
     let parent = this.document;
     let part;
-    for (let i=0; i<index; i++) {
+    for (let i = 0; i < index; i++) {
       part = parts[i];
 
       if (Array.isArray(parent)) {
@@ -274,7 +274,7 @@ class JSONPatchMongoose {
     //this also gets tricky when dealing with arrays, and subdocs in arrays, especially when there's an embedded object in
     //an array subdoc
 
-    for (let i=0; i<=parts.length; i++) {
+    for (let i = 0; i <= parts.length; i++) {
       if (i < parts.length)
         part = parts[i];
 
@@ -328,7 +328,7 @@ class JSONPatchMongoose {
           await relative_root.populate(relative_path);
           current_object = relative_root.get(relative_path);
           relative_root = current_object;
-          relative_root_index = i-1;
+          relative_root_index = i - 1;
           if (!this.save_queue.includes(current_object))
             this.save_queue.push(current_object);
         }
@@ -354,7 +354,7 @@ class JSONPatchMongoose {
           type: 'root',
         }
         relative_root = current_object;
-        relative_root_index = i-1;
+        relative_root_index = i - 1;
         if (!this.save_queue.includes(current_object))
           this.save_queue.push(current_object);
       }
@@ -418,13 +418,13 @@ class JSONPatchMongoose {
         }
       }
 
-      if (i==parts.length)
+      if (i == parts.length)
         break;
       if (part == '-')
         break;
 
-      absolute_path = parts.slice(0,i+1).join('.');
-      relative_path = parts.slice(relative_root_index + 1, i+1).join('.');
+      absolute_path = parts.slice(0,i + 1).join('.');
+      relative_path = parts.slice(relative_root_index + 1, i + 1).join('.');
 
       current_object = current_object[part];
     };

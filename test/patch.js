@@ -15,11 +15,9 @@ let mongod;
 let author_id, coauthor_id, collaborator_id, series_id, book_id;
 
 before(async () => {
-
   mongod = await mms.MongoMemoryServer.create();
   const connection_string = await mongod.getUri();
-  await mongoose.connect(connection_string, {useNewUrlParser: true});
-
+  await mongoose.connect(connection_string);
 });
 
 after(async () => {
