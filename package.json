@@ -28,13 +28,13 @@
   "homepage": "https://github.com/claytongulick/mongoose-json-patch#readme",
   "dependencies": {
     "ajv": "8.16.0",
-    "json-patch-rules": "^0.1.0",
-    "mongoose": "8.4.0"
+    "json-patch-rules": "^0.1.0"
   },
   "devDependencies": {
     "chai": "^5.1.1",
     "mocha": "^10.4.0",
     "mongodb-memory-server": "^9.3.0",
+    "mongoose": "8.4.0",
     "@stylistic/eslint-plugin-js": "^2.1.0",
     "eslint-plugin-mocha": "^10.4.3",
     "eslint-plugin-node": "^11.1.0"

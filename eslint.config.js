@@ -3,7 +3,6 @@ const globals = require("globals");
 const stylisticJs = require('@stylistic/eslint-plugin-js');
 const mocha = require("eslint-plugin-mocha");
 
-debugger;
 module.exports = [
   js.configs.recommended,
   {
