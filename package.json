@@ -1,5 +1,5 @@
 {
-  "name": "mongoose-patcher",
+  "name": "@walcu-engineering/mongoose-json-patch",
   "version": "0.3.0",
   "description": "A utility for applying RFC6902 JSONPatch operations to mongoose models",
   "main": "index.js",
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/claytongulick/mongoose-json-patch.git"
+    "url": "git+https://github.com/Walcu-Engineering/mongoose-json-patch.git"
   },
   "keywords": [
     "mongoose",
@@ -21,10 +21,10 @@
     "rfc6902",
     "model"
   ],
-  "author": "Clayton C Gulick",
+  "author": "Walcu Engineering Team",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/claytongulick/mongoose-json-patch/issues"
+    "url": "https://github.com/walcu-engineering/mongoose-json-patch/issues"
   },
   "homepage": "https://github.com/claytongulick/mongoose-json-patch#readme",
   "dependencies": {
