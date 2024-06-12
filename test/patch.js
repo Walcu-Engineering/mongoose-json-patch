@@ -100,6 +100,18 @@ describe("Patch", () => {
       assert.equal(author.first_name, 'Jimmy');
     });
 
+    it("Should set an undefined value", async () => {
+      let author = await Author.findOne({ _id: author_id });
+      const patch = [
+        { path: '/first_name', op: 'add', value: undefined },
+      ];
+      author.jsonPatch(patch);
+      await author.save();
+      author = null;
+      author = await Author.findOne({ _id: author_id });
+      assert.equal(author.first_name, undefined);
+    });
+
     it("Should set an array value", async () => {
       let author = await Author.findOne({ _id: author_id });
       const patch = [

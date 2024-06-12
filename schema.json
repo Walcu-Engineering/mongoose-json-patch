@@ -11,7 +11,6 @@
       "allOf": [ { "$ref": "#/definitions/path" } ],
       "oneOf": [
         {
-          "required": [ "value" ],
           "type": "object",
           "properties": {
             "op": {
