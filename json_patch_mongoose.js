@@ -155,6 +155,21 @@ class JSONPatchMongoose {
     this.document.set(path, value);
   }
 
+  getDefaultValue(nested_paths) {
+    let schema = this.schema;
+    for (let i = 0; i < nested_paths.length; ++i) {
+      const part = nested_paths[i];
+      if (i === (nested_paths.length - 1)) {
+        if (!schema.paths[part]) return {};
+        const defaultValue = schema.paths[part]?.defaultValue;
+        if (defaultValue === undefined)
+          return {}
+        return typeof defaultValue === 'function' ? defaultValue() : defaultValue;
+      }
+      schema = schema.paths[part].schema;
+    }
+  }
+
   /**
      * Walk down a mongoose dotted path, dereferencing objects. Return the value at the 'index' position in the path, or if index isn't specified, the
      * 'leaf' pointed to by the entire path. A negative index will indicate an offset from the end of the path.
@@ -169,11 +184,18 @@ class JSONPatchMongoose {
       index = parts.length + index;
 
     let parent = this.document;
-    let part;
+    let part, nested_paths = [], current_path = '';
     for (let i = 0; i < index; i++) {
       part = parts[i];
+      const is_array = Array.isArray(parent);
+      if (is_array) {
+        nested_paths.push(current_path, parseInt(part));
+        current_path = '';
+      } else {
+        current_path = current_path === '' ? part : current_path + '.' + part;
+      }
 
-      if (Array.isArray(parent)) {
+      if (is_array) {
         part = parseInt(part);
         if (isNaN(part))
           throw new Error("Invalid index on array: " + part);
@@ -182,7 +204,11 @@ class JSONPatchMongoose {
       if (i === (parts.length - 1))
         break;
 
+      if (!parent[part])
+        parent[part] = this.getDefaultValue(nested_paths.concat(current_path).filter(f => f != null && f !== ""));
       parent = parent[part];
+      if (is_array)
+        nested_paths.pop();
     }
 
     return parent;

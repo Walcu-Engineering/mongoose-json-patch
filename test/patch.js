@@ -177,6 +177,48 @@ describe("Patch", () => {
       assert.equal(author.phone_numbers[2], "222-222-2222");
     });
 
+    it("Should add a value to the end of a non existing array", async () => {
+      let author = await Author.findOne({ _id: author_id });
+      author.aliases = undefined;
+      const patch = [
+        { op: "add", path: "/aliases/names/-", value: "manin" },
+      ];
+
+      author.jsonPatch(patch);
+      await author.save();
+      author = null;
+      author = await Author.findOne({ _id: author_id });
+      assert.deepStrictEqual(author.aliases.names.toObject(), ['manin']);
+    });
+
+    it("Should work in this stupid case", async () => {
+      let author = await Author.findOne({ _id: author_id });
+      const patch = [
+        { op: "add", path: "/obj/arr/0/obj/field1", value: 123 },
+        { op: "add", path: "/obj/arr/0/obj/field2", value: "what" },
+      ];
+
+      author.jsonPatch(patch);
+      await author.save();
+      author = null;
+      author = await Author.findOne({ _id: author_id });
+      assert.equal(author.obj.arr[0].obj.field1, 123);
+      assert.equal(author.obj.arr[0].obj.field2, 'what');
+    });
+
+    it("Should work in this even stupider case", async () => {
+      let author = await Author.findOne({ _id: author_id });
+      const patch = [
+        { op: "add", path: "/obj/arr/0/obj/arr/0/field3", value: 'what' },
+      ];
+
+      author.jsonPatch(patch);
+      await author.save();
+      author = null;
+      author = await Author.findOne({ _id: author_id });
+      assert.equal(author.obj.arr[0].obj.arr[0].field3, 'what');
+    });
+
     it("Should throw error when adding value to index bigger than value array", async () => {
       let error;
       let author = await Author.findOne({ _id: author_id });

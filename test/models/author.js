@@ -27,6 +27,17 @@ const Author = new Schema({
   aliases: {
     names: [String],
   },
+  obj: {
+    arr: [{
+      obj: {
+        field1: Number,
+        field2: String,
+        arr: [{
+          field3: String,
+        }],
+      },
+    }],
+  },
 });
 
 Author.plugin(json_patch_plugin, {
