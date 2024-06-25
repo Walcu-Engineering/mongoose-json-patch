@@ -191,32 +191,32 @@ describe("Patch", () => {
       assert.deepStrictEqual(author.aliases.names.toObject(), ['manin']);
     });
 
-    it("Should work in this stupid case", async () => {
+    it("Should work with super nested paths", async () => {
       let author = await Author.findOne({ _id: author_id });
       const patch = [
-        { op: "add", path: "/obj/arr/0/obj/field1", value: 123 },
-        { op: "add", path: "/obj/arr/0/obj/field2", value: "what" },
+        { op: "add", path: "/super_nested/arr/0/obj/field1", value: 123 },
+        { op: "add", path: "/super_nested/arr/0/obj/field2", value: "what" },
       ];
 
       author.jsonPatch(patch);
       await author.save();
       author = null;
       author = await Author.findOne({ _id: author_id });
-      assert.equal(author.obj.arr[0].obj.field1, 123);
-      assert.equal(author.obj.arr[0].obj.field2, 'what');
+      assert.equal(author.super_nested.arr[0].obj.field1, 123);
+      assert.equal(author.super_nested.arr[0].obj.field2, 'what');
     });
 
-    it("Should work in this even stupider case", async () => {
+    it("Should work with super nested obj and array", async () => {
       let author = await Author.findOne({ _id: author_id });
       const patch = [
-        { op: "add", path: "/obj/arr/0/obj/arr/0/field3", value: 'what' },
+        { op: "add", path: "/super_nested/arr/0/obj/nested_arr/0/field3", value: 'what' },
       ];
 
       author.jsonPatch(patch);
       await author.save();
       author = null;
       author = await Author.findOne({ _id: author_id });
-      assert.equal(author.obj.arr[0].obj.arr[0].field3, 'what');
+      assert.equal(author.super_nested.arr[0].obj.nested_arr[0].field3, 'what');
     });
 
     it("Should throw error when adding value to index bigger than value array", async () => {
@@ -233,6 +233,59 @@ describe("Patch", () => {
       assert(error);
       assert.equal(error.message, 'Invalid index value: 100 for array add');
     });
+
+    it("Should work with doubly nested arrays of primitives", async () => {
+      let author = await Author.findOne({ _id: author_id });
+      const patch = [
+        { op: "add", path: "/double_nested_array/0/0", value: 'what' },
+      ];
+
+      author.jsonPatch(patch);
+      await author.save();
+      author = null;
+      author = await Author.findOne({ _id: author_id });
+      assert.equal(author.double_nested_array[0][0], 'what');
+    });
+
+    it("Should work with doubly nested arrays of primitives adding to the end", async () => {
+      let author = await Author.findOne({ _id: author_id });
+      const patch = [
+        { op: "add", path: "/double_nested_array/-/-", value: 'what' },
+      ];
+
+      author.jsonPatch(patch);
+      await author.save();
+      author = null;
+      author = await Author.findOne({ _id: author_id });
+      assert.equal(author.double_nested_array[0][0], 'what');
+    });
+
+    it("Should work with tiple nested arrays of primitives", async () => {
+      let author = await Author.findOne({ _id: author_id });
+      const patch = [
+        { op: "add", path: "/triple_nested_array/0/0/0", value: 'what' },
+      ];
+
+      author.jsonPatch(patch);
+      await author.save();
+      author = null;
+      author = await Author.findOne({ _id: author_id });
+      assert.equal(author.triple_nested_array[0][0][0], 'what');
+    });
+
+    it("Should work with tiple nested arrays of primitives adding to the end", async () => {
+      let author = await Author.findOne({ _id: author_id });
+      const patch = [
+        { op: "add", path: "/triple_nested_array/-/-/-", value: 'what' },
+      ];
+
+      author.jsonPatch(patch);
+      await author.save();
+      author = null;
+      author = await Author.findOne({ _id: author_id });
+      assert.equal(author.triple_nested_array[0][0][0], 'what');
+    });
+
   });
 
   describe("Move", () => {

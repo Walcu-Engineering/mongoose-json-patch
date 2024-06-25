@@ -155,19 +155,12 @@ class JSONPatchMongoose {
     this.document.set(path, value);
   }
 
-  getDefaultValue(nested_paths) {
-    let schema = this.schema;
-    for (let i = 0; i < nested_paths.length; ++i) {
-      const part = nested_paths[i];
-      if (i === (nested_paths.length - 1)) {
-        if (!schema.paths[part]) return {};
-        const defaultValue = schema.paths[part]?.defaultValue;
-        if (defaultValue === undefined)
-          return {}
-        return typeof defaultValue === 'function' ? defaultValue() : defaultValue;
-      }
-      schema = schema.paths[part].schema;
-    }
+  getDefaultValue(schema) {
+    if (!schema) return schema.cast({});
+    const defaultValue = schema.defaultValue;
+    if (defaultValue === undefined)
+      return schema.cast({});
+    return typeof defaultValue === 'function' ? defaultValue() : defaultValue;
   }
 
   /**
@@ -183,32 +176,25 @@ class JSONPatchMongoose {
     if (index < 0)
       index = parts.length + index;
 
-    let parent = this.document;
-    let part, nested_paths = [], current_path = '';
+    let parent = this.document, schema = parent;
     for (let i = 0; i < index; i++) {
-      part = parts[i];
+      let part = parts[i];
       const is_array = Array.isArray(parent);
       if (is_array) {
-        nested_paths.push(current_path, parseInt(part));
-        current_path = '';
-      } else {
-        current_path = current_path === '' ? part : current_path + '.' + part;
-      }
-
-      if (is_array) {
-        part = parseInt(part);
+        part = part === '-' ? parent.length : parseInt(part);
         if (isNaN(part))
           throw new Error("Invalid index on array: " + part);
+        schema = schema.$embeddedSchemaType;
+      } else {
+        schema = schema.schema.path(part);
       }
 
       if (i === (parts.length - 1))
         break;
 
       if (!parent[part])
-        parent[part] = this.getDefaultValue(nested_paths.concat(current_path).filter(f => f != null && f !== ""));
+        parent[part] = this.getDefaultValue(schema);
       parent = parent[part];
-      if (is_array)
-        nested_paths.pop();
     }
 
     return parent;
