@@ -155,6 +155,14 @@ class JSONPatchMongoose {
     this.document.set(path, value);
   }
 
+  getDefaultValue(schema) {
+    if (!schema) return schema.cast({});
+    const defaultValue = schema.defaultValue;
+    if (defaultValue === undefined)
+      return schema.cast({});
+    return typeof defaultValue === 'function' ? defaultValue() : defaultValue;
+  }
+
   /**
      * Walk down a mongoose dotted path, dereferencing objects. Return the value at the 'index' position in the path, or if index isn't specified, the
      * 'leaf' pointed to by the entire path. A negative index will indicate an offset from the end of the path.
@@ -168,20 +176,24 @@ class JSONPatchMongoose {
     if (index < 0)
       index = parts.length + index;
 
-    let parent = this.document;
-    let part;
+    let parent = this.document, schema = parent;
     for (let i = 0; i < index; i++) {
-      part = parts[i];
-
-      if (Array.isArray(parent)) {
-        part = parseInt(part);
+      let part = parts[i];
+      const is_array = Array.isArray(parent);
+      if (is_array) {
+        part = part === '-' ? parent.length : parseInt(part);
         if (isNaN(part))
           throw new Error("Invalid index on array: " + part);
+        schema = schema.$embeddedSchemaType;
+      } else {
+        schema = schema.schema.path(part);
       }
 
       if (i === (parts.length - 1))
         break;
 
+      if (!parent[part])
+        parent[part] = this.getDefaultValue(schema);
       parent = parent[part];
     }
 

@@ -16,16 +16,31 @@ const Author = new Schema({
       ref: "Book",
     },
   ],
-  address: {
+  address: new mongoose.Schema({
     city: String,
     state: String,
     zip: String,
     address_1: String,
     address_2: String,
-  },
+  }),
   phone_numbers: [String],
-  aliases: {
+  aliases: new mongoose.Schema({
     names: [String],
+  }),
+  double_nested_array: [[String]],
+  triple_nested_array: [[[String]]],
+  super_nested: {
+    type: new mongoose.Schema({
+      arr: [new mongoose.Schema({
+        obj: new mongoose.Schema({
+          field1: Number,
+          field2: String,
+          nested_arr: [new mongoose.Schema({
+            field3: String,
+          })],
+        }),
+      })],
+    })
   },
 });
 
