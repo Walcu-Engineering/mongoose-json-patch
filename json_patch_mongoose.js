@@ -152,7 +152,11 @@ class JSONPatchMongoose {
      * @param {*} value
      */
   setPath(path, value) {
-    this.document.set(path, value);
+    if (path === ""){
+      this.document.overwrite(value);
+    } else {
+      this.document.set(path, value);
+    }
   }
 
   getDefaultValue(schema) {

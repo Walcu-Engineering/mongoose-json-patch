@@ -39,6 +39,8 @@ describe("Revert Transformation", () => {
 
 describe("Patch", () => {
 
+  let book_id, author_id;
+
   beforeEach("Init documents", async () => {
     await Author.deleteMany({});
     await Series.deleteMany({});
@@ -88,6 +90,7 @@ describe("Patch", () => {
   });
 
   describe("Add", () => {
+
     it("Should set a value", async () => {
       let author = await Author.findOne({ _id: author_id });
       const patch = [
@@ -376,6 +379,17 @@ describe("Patch", () => {
       book = null;
       book = await Book.findOne({ _id: book_id });
       assert.equal(book.coauthor.gets_credit, true);
+    });
+
+    it("Should replace the entire document", async () => {
+      let book = await Book.findOne({ _id: book_id });
+      const patch = [
+        { path: '/', op: 'replace', value: { name: "Narnia" } },
+      ];
+      book.jsonPatch(patch);
+      await book.save();
+      book = await Book.findOne({ _id: book_id }, { __v: 0, _id: 0 });
+      assert.deepStrictEqual(book.toObject(), { collaborators: [], name: "Narnia" });
     });
   });
 
