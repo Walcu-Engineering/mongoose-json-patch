@@ -61,12 +61,6 @@ class JSONPatchMongoose {
     }
   }
 
-  replace(item) {
-    const { path, value } = item;
-    const mongoose_path = this.jsonPointerToMongoosePath(path);
-    this.setPath(mongoose_path, value);
-  }
-
   remove(item) {
     let { path } = item;
     //if the path is an array, remove the element, otherwise set to undefined
@@ -79,7 +73,7 @@ class JSONPatchMongoose {
   }
 
   add(item) {
-    let { value } = item;
+    const { value } = item;
     const path = this.jsonPointerToMongoosePath(item.path);
     const parts = path.split('.');
     let part = parts[parts.length - 1];
@@ -107,21 +101,36 @@ class JSONPatchMongoose {
       this.setPath(path, value);
   }
 
+  replace(item) {
+    // From RFC 6902:
+    // This operation is functionally identical to a "remove" operation for
+    // a value, followed immediately by an "add" operation at the same
+    // location with the replacement value.
+    const { path, value } = item;
+    this.remove({ path });
+    this.add({ path, value });
+  }
+
   copy(item) {
-    let { from, path } = item;
-    from = this.jsonPointerToMongoosePath(from);
-    path = this.jsonPointerToMongoosePath(path);
-    const value = this.document.get(from);
-    this.setPath(path, value);
+    // From RFC 6902:
+    // This operation is functionally identical to an "add" operation at the
+    // target location using the value specified in the "from" member.
+    const { from, path } = item;
+    const mongoose_from = this.jsonPointerToMongoosePath(from);
+    const value = this.document.get(mongoose_from);
+    this.add({ path, value });
   }
 
   move(item) {
-    let { from, path } = item;
-    from = this.jsonPointerToMongoosePath(from);
-    path = this.jsonPointerToMongoosePath(path);
-    const value = this.document.get(from);
-    this.setPath(path, value);
-    this.setPath(from, null);
+    // From RFC 6902:
+    // This operation is functionally identical to a "remove" operation on
+    // the "from" location, followed immediately by an "add" operation at
+    // the target location with the value that was just removed.
+    const { from, path } = item;
+    const mongoose_from = this.jsonPointerToMongoosePath(from);
+    const value = this.document.get(mongoose_from);
+    this.remove({ path: from });
+    this.add({ path, value });
   }
 
   test(item) {
@@ -153,7 +162,7 @@ class JSONPatchMongoose {
      */
   setPath(path, value) {
     if (path === ""){
-      this.document.overwrite(value);
+      this.document.overwrite(value ?? {});
     } else {
       this.document.set(path, value);
     }

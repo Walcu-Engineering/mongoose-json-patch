@@ -293,11 +293,29 @@ describe("Patch", () => {
 
   describe("Move", () => {
     it("Should set new path and set old path to null", async () => {
-
+      let author = await Author.findOne({ _id: author_id });
+      const patch = [
+        { op: "move", from: '/first_name', path: '/last_name' },
+      ];
+      author.jsonPatch(patch);
+      await author.save();
+      author = null;
+      author = await Author.findOne({ _id: author_id });
+      assert.equal(author.first_name, null);
+      assert.equal(author.last_name, 'JRR');
     });
 
     it("Should move an array element to a new position", async () => {
-
+      let author = await Author.findOne({ _id: author_id });
+      const patch = [
+        { op: "move", from: '/phone_numbers/0', path: '/phone_numbers/1' },
+      ];
+      author.jsonPatch(patch);
+      await author.save();
+      author = null;
+      author = await Author.findOne({ _id: author_id });
+      assert.equal(author.phone_numbers[0], '222-222-2222');
+      assert.equal(author.phone_numbers[1], '111-111-1111');
     });
   });
 
@@ -384,7 +402,7 @@ describe("Patch", () => {
     it("Should replace the entire document", async () => {
       let book = await Book.findOne({ _id: book_id });
       const patch = [
-        { path: '/', op: 'replace', value: { name: "Narnia" } },
+        { path: '', op: 'replace', value: { name: "Narnia" } },
       ];
       book.jsonPatch(patch);
       await book.save();
