@@ -39,7 +39,7 @@ describe("Revert Transformation", () => {
 
 describe("Patch", () => {
 
-  let book_id, author_id;
+  let book_id, author_id, series_id;
 
   beforeEach("Init documents", async () => {
     await Author.deleteMany({});
@@ -288,6 +288,28 @@ describe("Patch", () => {
       author = await Author.findOne({ _id: author_id });
       assert.equal(author.triple_nested_array[0][0][0], 'what');
     });
+    it("Should properly call cast", async () => {
+      let series = await Series.findOne({ _id: series_id });
+      const patch = [
+        { op: "add", path: "/customs/mycustom", value: 'hey' },
+      ];
+      series.jsonPatch(patch);
+      await series.save();
+      series = null;
+      series = await Series.findOne({ _id: series_id });
+      assert.deepStrictEqual(series.customs, { a: 1, mycustom: "hey" });
+    });
+    it("Should ignore unexisting paths", async () => {
+      let series = await Series.findOne({ _id: series_id });
+      const patch = [
+        { op: "add", path: "/not/existing", value: 'ho' },
+      ];
+      series.jsonPatch(patch);
+      await series.save();
+      series = null;
+      series = await Series.findOne({ _id: series_id });
+      assert.equal(series.not, null);
+    });
 
   });
 
@@ -437,6 +459,18 @@ describe("Patch", () => {
       //these already existed
       assert.equal(author.phone_numbers[0], "222-222-2222");
     });
+
+    it("Should do nothing if parent does not exist", async () => {
+      const author = await Author.findOne({ _id: author_id });
+      const patch = [
+        { op: "remove", path: "/aliases/names" },
+      ];
+      author.jsonPatch(patch);
+      await author.save();
+      const author_post = await Author.findOne({ _id: author_id });
+      assert.equal(author_post.aliases, undefined);
+    });
+
   });
 
   describe("Embedded arrays", () => {
