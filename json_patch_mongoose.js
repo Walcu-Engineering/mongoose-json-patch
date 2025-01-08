@@ -66,10 +66,11 @@ class JSONPatchMongoose {
     //if the path is an array, remove the element, otherwise set to undefined
     path = this.jsonPointerToMongoosePath(path);
     const current_value = this.document.get(path);
-    const parent = this.walkPath(path, -1);
+    const parent = this.walkPath(path, -1, 'stop', this.document);
     if (Array.isArray(parent))
       return parent.pull(current_value);
-    this.setPath(path, undefined);
+    else if (parent)
+      this.setPath(path, undefined);
   }
 
   add(item) {
@@ -77,7 +78,7 @@ class JSONPatchMongoose {
     const path = this.jsonPointerToMongoosePath(item.path);
     const parts = path.split('.');
     let part = parts[parts.length - 1];
-    const parent = this.walkPath(path, -1);
+    const parent = this.walkPath(path, -1, 'create', this.document);
     // this should always be true
     if (Array.isArray(parent)) {
       if (part == '-') {
@@ -168,11 +169,11 @@ class JSONPatchMongoose {
     }
   }
 
-  getDefaultValue(schema) {
-    if (!schema) return schema.cast({});
+  getDefaultValue(schema, full_document) {
+    if (!schema) return null;
     const defaultValue = schema.defaultValue;
     if (defaultValue === undefined)
-      return schema.cast({});
+      return schema.cast({}, full_document);
     return typeof defaultValue === 'function' ? defaultValue() : defaultValue;
   }
 
@@ -182,7 +183,7 @@ class JSONPatchMongoose {
      * @param {*} path
      * @param {*} index
      */
-  walkPath(path, index) {
+  walkPath(path, index, on_null = 'stop', full_document) {
     const parts = path.split(".");
     if (typeof index == 'undefined')
       index = parts.length;
@@ -205,8 +206,10 @@ class JSONPatchMongoose {
       if (i === (parts.length - 1))
         break;
 
-      if (!parent[part])
-        parent[part] = this.getDefaultValue(schema);
+      if (!parent[part] && on_null === 'create')
+        parent[part] = this.getDefaultValue(schema, full_document);
+      else if (!parent[part] && on_null === 'stop')
+        return null;
       parent = parent[part];
     }
 
