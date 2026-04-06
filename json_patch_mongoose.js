@@ -65,10 +65,12 @@ class JSONPatchMongoose {
     let { path } = item;
     //if the path is an array, remove the element, otherwise set to undefined
     path = this.jsonPointerToMongoosePath(path);
-    const current_value = this.document.get(path);
     const parent = this.walkPath(path, -1, 'stop', this.document);
-    if (Array.isArray(parent))
-      return parent.pull(current_value);
+    if (Array.isArray(parent)) {
+      const parts = path.split('.');
+      const index = parts[parts.length - 1];
+      return parent.splice(index, 1);
+    }
     else if (parent)
       this.setPath(path, undefined);
   }

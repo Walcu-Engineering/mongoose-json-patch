@@ -6,7 +6,6 @@ class Customs extends mongoose.SchemaType {
   constructor(key, options){
     super(key, options, 'Mixed');
     this.path = key;
-    console.log(this.path);
   }
   cast(val, full_document) {
     const path = this.path;

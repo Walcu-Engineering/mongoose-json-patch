@@ -12,7 +12,7 @@ const Author = require('./models/author');
 const Series = require('./models/series');
 
 let mongod;
-let author_id, coauthor_id, collaborator_id;
+let book_id, series_id, author_id, coauthor_id, collaborator_id;
 
 before(async () => {
   mongod = await mms.MongoMemoryServer.create();
@@ -39,7 +39,6 @@ describe("Revert Transformation", () => {
 
 describe("Patch", () => {
 
-  let book_id, author_id, series_id;
 
   beforeEach("Init documents", async () => {
     await Author.deleteMany({});
@@ -61,7 +60,7 @@ describe("Patch", () => {
         first_name: "Clay",
         last_name: "Gulick",
         address: { city: "NoWhere", state:"TX", zip: "12345", address_1: "123 anywhere dr" },
-        phone_numbers: ["111-111-1111", "222-222-2222"],
+        phone_numbers: ["1", "1", "2"],
       });
     await coauthor.save();
     coauthor_id = coauthor._id;
@@ -458,6 +457,20 @@ describe("Patch", () => {
       author = await Author.findOne({ _id: author_id });
       //these already existed
       assert.equal(author.phone_numbers[0], "222-222-2222");
+    });
+
+    it("Should remove only one array element", async () => {
+      let coauthor = await Author.findOne({ _id: coauthor_id });
+      const patch = [
+        { op: "remove", path: "/phone_numbers/0" },
+      ];
+
+      coauthor.jsonPatch(patch);
+      await coauthor.save();
+      coauthor = null;
+      coauthor = await Author.findOne({ _id: coauthor_id });
+      //these already existed
+      assert.equal(coauthor.phone_numbers[0], "1");
     });
 
     it("Should do nothing if parent does not exist", async () => {
