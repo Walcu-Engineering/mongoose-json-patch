@@ -11,9 +11,7 @@ const Ajv = require('ajv');
 const ajv = new Ajv();
 const validate = ajv.compile(patch_schema); //run sync at startup time
 
-/**
- * Utility class for applying a RFC6902 compliant json-patch transformation to a mongoose model.
- */
+// Utility class for applying a RFC6902 compliant json-patch transformation to a mongoose model.
 class JSONPatchMongoose {
   constructor(schema, options) {
     this.schema = schema;
@@ -25,10 +23,7 @@ class JSONPatchMongoose {
     this.save_queue = [];
   }
 
-  /**
-     * Verify that the patch documents meets the RFC schema
-     * @param {*} patch
-     */
+  // Verify that the patch documents meets the RFC schema
   validate(patch) {
     const valid = validate(patch);
     if (!valid)
@@ -36,18 +31,13 @@ class JSONPatchMongoose {
     return valid;
   }
 
-  /**
-     * Apply a patch to a mongoose document, optionally with a set of rules that specify allowed fields.
-     * @param {*} patch
-     * @param {*} document
-     * @param {*} rules
-     */
+  // Apply a patch to a mongoose document, optionally with a set of rules that specify allowed fields.
   apply(patch, document) {
-    //first, verify the patch is a valid RFC6902 json-patch document
+    // First verify the patch is a valid RFC6902 json-patch document
     if (!this.validate(patch))
       throw new Error(JSON.stringify(this.errors));
 
-    //next, make sure it passes all rules
+    // Next, make sure it passes all rules
     if (this.patch_rules)
       if (!this.patch_rules.check(patch))
         throw new Error("Patch failed rule check");
@@ -69,7 +59,8 @@ class JSONPatchMongoose {
     if (Array.isArray(parent)) {
       const parts = path.split('.');
       const index = parts[parts.length - 1];
-      return parent.splice(index, 1);
+      parent.splice(index, 1);
+      this.markIfUntracked(parent, parts);
     }
     else if (parent)
       this.setPath(path, undefined);
@@ -84,7 +75,8 @@ class JSONPatchMongoose {
     // this should always be true
     if (Array.isArray(parent)) {
       if (part == '-') {
-        return parent.push(value);
+        parent.push(value);
+        this.markIfUntracked(parent, parts);
       }
       else {
         try {
@@ -94,6 +86,7 @@ class JSONPatchMongoose {
           //this calls mongoose splice, which has proper change tracking
           //rfc6902 says we don't spread array values, we just add an array element
           parent.splice(part, 0, value);
+          this.markIfUntracked(parent, parts);
         }
         catch (err) {
           throw new Error("Invalid index value: " + part + " for array add", err);
@@ -171,6 +164,16 @@ class JSONPatchMongoose {
     }
   }
 
+  // If we are applying a patch directly to a js array (not managed by mongoose, for example
+  // inside a Mixed type), we need to tell mongoose that the field has been modified in order to
+  // save the changes to db
+  markIfUntracked(parent, parts) {
+    if (parent.isMongooseArray) return;
+    const parent_path = parts.slice(0, -1).join('.');
+    if (parent_path)
+      this.document.markModified(parent_path);
+  }
+
   getDefaultValue(schema, full_document) {
     if (!schema) return null;
     const defaultValue = schema.defaultValue;
@@ -196,7 +199,9 @@ class JSONPatchMongoose {
     for (let i = 0; i < index; i++) {
       let part = parts[i];
       const is_array = Array.isArray(parent);
-      if (is_array) {
+      if (schema.instance === 'Mixed') {
+        // Nothing, keep the schema Mixed forever
+      } else if (is_array) {
         part = part === '-' ? parent.length : parseInt(part);
         if (isNaN(part))
           throw new Error("Invalid index on array: " + part);

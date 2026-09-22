@@ -309,6 +309,19 @@ describe("Patch", () => {
       series = await Series.findOne({ _id: series_id });
       assert.equal(series.not, null);
     });
+    it("Should add to array inside mixed type", async () => {
+      let book = await Book.findOne({ _id: book_id });
+      book.details = { list: [1, 2, 3] };
+      await book.save();
+      const patch = [
+        { op: "add", path: "/details/list/-", value: 4 },
+      ];
+      book.jsonPatch(patch);
+      await book.save();
+      book = null;
+      book = await Book.findOne({ _id: book_id });
+      assert.deepStrictEqual(book.details, { list: [1, 2, 3, 4] });
+    });
 
   });
 
@@ -430,6 +443,41 @@ describe("Patch", () => {
       book = await Book.findOne({ _id: book_id }, { __v: 0, _id: 0 });
       assert.deepStrictEqual(book.toObject(), { collaborators: [], name: "Narnia" });
     });
+    it("Should allow any changes to a mixed type", async () => {
+      let book = await Book.findOne({ _id: book_id });
+      const patch = [
+        { op: "replace", path: "/details", value: { test: { test: { test: { test: 'test' } } } } },
+      ];
+      book.jsonPatch(patch);
+      await book.save();
+      book = null;
+      book = await Book.findOne({ _id: book_id });
+      assert.deepStrictEqual(book.details, { test: { test: { test: { test: 'test' } } } });
+    });
+    it("Should allow internal changes inside a mixed type", async () => {
+      let book = await Book.findOne({ _id: book_id });
+      const patch = [
+        { op: "replace", path: "/details/test/test", value: 'test' },
+      ];
+      book.jsonPatch(patch);
+      await book.save();
+      book = null;
+      book = await Book.findOne({ _id: book_id });
+      assert.deepStrictEqual(book.details, { test: { test: 'test' } });
+    });
+    // it("Should allow changing a primitive value to an object in a mixed type", async () => {
+    //   let book = await Book.findOne({ _id: book_id });
+    //   book.details = 5;
+    //   await book.save();
+    //   const patch = [
+    //     { op: "replace", path: "/details/test", value: 'test' },
+    //   ];
+    //   book.jsonPatch(patch);
+    //   await book.save();
+    //   book = null;
+    //   book = await Book.findOne({ _id: book_id });
+    //   assert.deepStrictEqual(book.details, { test: 'test' });
+    // });
   });
 
   describe("Remove", () => {
