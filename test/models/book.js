@@ -26,6 +26,7 @@ const Book = new Schema({
   ],
   reference_id: Schema.Types.ObjectId,
   publisher: String,
+  details: Schema.Types.Mixed,
 }, {
 
 });
